@@ -10,7 +10,7 @@
 Debug/
 Release/
 Export/
-CortexM0/
+CortexM*/
 codegentemp
 Generated_Source
 *_datasheet.pdf
