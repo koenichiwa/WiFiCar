@@ -9,25 +9,15 @@
  *
  * ========================================
 */
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
-*/
+
 #include "project.h"
 #include <math.h>
 #include <stdio.h>
 #include <assert.h>
 #include "squircular.h"
+#include "mytypes.h"
 
 //MACROS
-
 // Not used anymore but still useful
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -64,12 +54,10 @@
 #define DRIVECOMMAND_SPACE_CIRCLE 'c'
 #define DRIVECOMMAND_SPACE_SQUARE 's'
 
-
 //STRUCT DEFINITIONS AND STRUCT SPECIFIC FUNCTIONS
 typedef struct driveCommand {
     char space; // 'c' denotes vector is on a circle 's' denotes it's on a square
-    float forward;
-    float direction; //Positive is right negative is left
+    fvector2_t moveVector; // x is direction, y is forward
 } driveCommand_t;
 
 typedef struct state {
@@ -97,7 +85,7 @@ int testCounter = 0;
 
 //GLOBAL VARIABLES
 volatile state_t state = {
-    {DRIVECOMMAND_SPACE_SQUARE, 0.0, 0.0}, // driveCommand
+    {DRIVECOMMAND_SPACE_SQUARE, {0.0, 0.0}}, // driveCommand
     FLAG_STATE_CHANGED // hasChanged (Set to 1 because "The creation of state is a change of state" - <INSERT RANDOM PHILOSOPHER>)
 };
 
@@ -156,61 +144,62 @@ CY_ISR(commandReceived){
 
 //FUNCTION DEFINITIONS
 //-TEST ROUTINE
+
 void runTestRoutine(int delay){
     Out_LED_Write(1);
     switch(testCounter){
         case 0:
-            state.driveCommand.direction = 1.0;
-            state.driveCommand.direction = 0.0;
+            state.driveCommand.moveVector.x = 1.0;
+            state.driveCommand.moveVector.y = 0.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
             testCounter++;
             break;
         case 1:
             CyDelay(delay);
-            state.driveCommand.direction = -1.0;
-            state.driveCommand.direction = 0.0;
+            state.driveCommand.moveVector.x = -1.0;
+            state.driveCommand.moveVector.y = 0.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
             testCounter++;
             break;
         case 2:
             CyDelay(delay);
-            state.driveCommand.direction = 0.0;
-            state.driveCommand.direction = 1.0;
+            state.driveCommand.moveVector.x = 0.0;
+            state.driveCommand.moveVector.y = 1.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
             testCounter++;
             break;
         case 3:
             CyDelay(delay);
-            state.driveCommand.direction = 0.0;
-            state.driveCommand.direction = -1.0;
+            state.driveCommand.moveVector.x = 0.0;
+            state.driveCommand.moveVector.y = -1.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
             testCounter++;
             break;
         case 4:
             CyDelay(delay);
-            state.driveCommand.direction = 1.0;
-            state.driveCommand.direction = 1.0;
+            state.driveCommand.moveVector.x = 1.0;
+            state.driveCommand.moveVector.y = 1.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
             testCounter++;
             break;
         case 5:
             CyDelay(delay);
-            state.driveCommand.direction = -1.0;
-            state.driveCommand.direction = -1.0;
+            state.driveCommand.moveVector.x = -1.0;
+            state.driveCommand.moveVector.y = -1.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
             testCounter++;
             break;
         case 6:
             CyDelay(delay);
-            state.driveCommand.direction = 0.5;
-            state.driveCommand.direction = 0.0;
+            state.driveCommand.moveVector.x = 0.5;
+            state.driveCommand.moveVector.y = 0.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
             testCounter++;
             break;
         default:
             CyDelay(delay);
-            state.driveCommand.direction = 0.0;
-            state.driveCommand.direction = 0.0;
+            state.driveCommand.moveVector.x = 0.0;
+            state.driveCommand.moveVector.y = 0.0;
             testCounter = 0;
             state.flags = (state.flags | FLAG_STATE_CHANGED) & ~FLAG_STATE_TEST ;
             Out_LED_Write(0);
@@ -259,43 +248,38 @@ driveCommand_t readDriveCommand(){
 /**
  * This function transforms a vector (direction, forward), which is found in driveCommand, to the vector (left, right) which represents 
  * the speed at which the left and the right motors run.
- * This can be achieved by rotating the vector by 45 degrees and projecting it on a square. (if (f,d) == (1.0, 0.0) then (l,r) == (1.0, 1.0))
+ * This can be achieved by rotating the vector by 45 degrees and projecting it on a square. (if (d,f) == (1.0, 0.0) then (l,r) == (1.0, 1.0))
  * (direction, forward) is expected to be on or inside the unit circle when command.space == 'c'
  * (direction, forward) is expected to be on or inside the square with range ([-1.0, 1.0], [-1.0, 1.0]) command.space == 's'
  * This is not tested during runtime (except if ran in debug mode)
  * If command.space is anything else it will return (0.0, 0.0)
  *
- * @param command The drive command containing the vector (f,d) and the space on which they lie
+ * @param command The drive command containing the vector (d,f) and the space on which they lie
  * @return The vector (l,r) In the range [-255,255]
 **/
 speeds_t convertDriveCommand(driveCommand_t command){
-    float circledDirection;
-    float circledForward;
+    fvector2_t circledVector;
     
     // project on circle if needed
     if (command.space == DRIVECOMMAND_SPACE_SQUARE){
-        ellipticalSquareToDisc(command.direction, command.forward, &circledDirection, &circledForward);
+        square_to_circle(&command.moveVector);
     }
     else if(command.space == DRIVECOMMAND_SPACE_CIRCLE){
-        circledDirection = command.direction;
-        circledForward = command.forward;
+        circledVector = command.moveVector;
     } else {
         //invalid
         speeds_t speeds = {0,0};
         return speeds;
     }
-    assert((circledDirection*circledDirection + circledForward*circledForward) <= 1.0);
+    assert(fvector_length(&circledVector) <= 1.0);
     //rotate by 45 degrees
-    float right = (circledForward - circledDirection) * M_SQRT1_2;
-    float left = (circledForward + circledDirection) * M_SQRT1_2;
-    float mappedLeft;
-    float mappedRight;
+    fvector2_t rotatedVector = fvector_rotate(&circledVector, M_PI_4);
     
     //project back on square
-    ellipticalDiscToSquare(left, right, &mappedLeft, &mappedRight);
+    fvector2_t squaredVector = circle_to_square(&rotatedVector);
     speeds_t speeds;
-    speeds.left = (int16) (mappedLeft * 255.0);
-    speeds.right = (int16) (mappedRight* 255.0);
+    speeds.left = (int16) (squaredVector.y * 255.0);
+    speeds.right = (int16) (squaredVector.x * 255.0);
     return speeds;
 }
 
