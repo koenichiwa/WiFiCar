@@ -8,6 +8,7 @@
 <files />
 <projects>
 <v>.\Car.cydsn\Car.cyprj</v>
+<v>.\WCComponentLibrary.cylib\WCComponentLibrary.cyprj</v>
 </projects>
 <workspace_id v="c614abf4-fff5-4add-935b-c23fd1ab6384" />
 <WriteAppVersionLastSavedWith v="4.4.0.80" />
