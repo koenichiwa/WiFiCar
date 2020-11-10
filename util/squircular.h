@@ -1,10 +1,15 @@
-// Adapted from: http://squircular.blogspot.com/2015/09/mapping-circle-to-square.html
+/**
+ * Created by Koen van Wel on 10/11/2020.
+ *
+ * Adapted from: http://squircular.blogspot.com/2015/09/mapping-circle-to-square.html
+ */
+
 #pragma once
 
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
-#include "mytypes.h"
+#include "vector.h"
 
 fvector2_t circle_to_square(fvector2_t * circle)
 {
@@ -35,4 +40,3 @@ fvector2_t square_to_circle(fvector2_t * square)
     circle.y = square->y * sqrt(1.0 - square->x*square->x/2.0);
     return circle;
 }
-/* [] END OF FILE */

@@ -14,20 +14,14 @@
 #include <math.h>
 #include <stdio.h>
 #include "squircular.h"
-#include "mytypes.h"
+#include "utils/vector.h"
+#include "utils/drive_command.h"
     
 //FLAGS
 #define FLAG_STATE_CHANGED  0b00000001
 #define FLAG_STATE_QUIT     0b00000010
 // insert other flags here
 #define FLAG_STATE_TEST     0b10000000
-
-//CONSTANTS
-//-OLED
-#define OLED_LINE_COMMAND 1
-#define OLED_LINE_SPEED 3
-// 5 not in use *yet*
-#define OLED_LINE_EXTRA 7
 
 //-UART
 #define UART_COMMAND_DRIVE  'd'
