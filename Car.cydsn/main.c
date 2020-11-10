@@ -14,8 +14,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "squircular.h"
-#include "utils/vector.h"
-#include "utils/drive_command.h"
+#include "drive_command.h"
     
 //FLAGS
 #define FLAG_STATE_CHANGED  0b00000001
@@ -31,15 +30,7 @@
 
 #define UART_RESPONSE_MSG_UNKNOWN   'u'
 
-//-DRIVECOMMAND
-#define DRIVECOMMAND_SPACE_CIRCLE 'c'
-#define DRIVECOMMAND_SPACE_SQUARE 's'
-
 //STRUCT DEFINITIONS AND STRUCT SPECIFIC FUNCTIONS
-typedef struct driveCommand {
-    char space; // 'c' denotes vector is on a circle 's' denotes it's on a square
-    fvector2_t moveVector; // x is direction, y is forward
-} driveCommand_t;
 
 typedef struct state {
     driveCommand_t driveCommand;
@@ -66,7 +57,7 @@ int testCounter = 0;
 
 //GLOBAL VARIABLES
 volatile state_t state = {
-    {DRIVECOMMAND_SPACE_CIRCLE, {0.0, 0.0}},
+    {DC_CIRCLE_DOMAIN, {0.0, 0.0}},
     FLAG_STATE_CHANGED // (Set because "The creation of state is a change of state" - <INSERT RANDOM PHILOSOPHER>)
 };
 
@@ -130,6 +121,7 @@ void runTestRoutine(int delay){
     Out_LED_Write(1);
     switch(testCounter){
         case 0:
+            state.driveCommand.domain = DC_SQUARE_DOMAIN;
             state.driveCommand.moveVector.x = 1.0;
             state.driveCommand.moveVector.y = 0.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
@@ -137,6 +129,7 @@ void runTestRoutine(int delay){
             break;
         case 1:
             CyDelay(delay);
+            state.driveCommand.domain = DC_SQUARE_DOMAIN;
             state.driveCommand.moveVector.x = -1.0;
             state.driveCommand.moveVector.y = 0.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
@@ -144,6 +137,7 @@ void runTestRoutine(int delay){
             break;
         case 2:
             CyDelay(delay);
+            state.driveCommand.domain = DC_SQUARE_DOMAIN;
             state.driveCommand.moveVector.x = 0.0;
             state.driveCommand.moveVector.y = 1.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
@@ -151,6 +145,7 @@ void runTestRoutine(int delay){
             break;
         case 3:
             CyDelay(delay);
+            state.driveCommand.domain = DC_SQUARE_DOMAIN;
             state.driveCommand.moveVector.x = 0.0;
             state.driveCommand.moveVector.y = -1.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
@@ -158,6 +153,7 @@ void runTestRoutine(int delay){
             break;
         case 4:
             CyDelay(delay);
+            state.driveCommand.domain = DC_SQUARE_DOMAIN;
             state.driveCommand.moveVector.x = 1.0;
             state.driveCommand.moveVector.y = 1.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
@@ -165,6 +161,7 @@ void runTestRoutine(int delay){
             break;
         case 5:
             CyDelay(delay);
+            state.driveCommand.domain = DC_SQUARE_DOMAIN;
             state.driveCommand.moveVector.x = -1.0;
             state.driveCommand.moveVector.y = -1.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
@@ -172,6 +169,7 @@ void runTestRoutine(int delay){
             break;
         case 6:
             CyDelay(delay);
+            state.driveCommand.domain = DC_SQUARE_DOMAIN;
             state.driveCommand.moveVector.x = 0.5;
             state.driveCommand.moveVector.y = 0.0;
             state.flags = state.flags | FLAG_STATE_CHANGED;
@@ -179,6 +177,7 @@ void runTestRoutine(int delay){
             break;
         default:
             CyDelay(delay);
+            state.driveCommand.domain = DC_SQUARE_DOMAIN;
             state.driveCommand.moveVector.x = 0.0;
             state.driveCommand.moveVector.y = 0.0;
             testCounter = 0;
@@ -242,10 +241,10 @@ speeds_t convertDriveCommand(driveCommand_t command){
     fvector2_t circledVector;
     
     // project on circle if needed
-    if (command.space == DRIVECOMMAND_SPACE_SQUARE){
+    if (command.domain == DC_SQUARE_DOMAIN){
         square_to_circle(&command.moveVector);
     }
-    else if(command.space == DRIVECOMMAND_SPACE_CIRCLE){
+    else if(command.domain == DC_CIRCLE_DOMAIN){
         circledVector = command.moveVector;
     } else {
         //invalid

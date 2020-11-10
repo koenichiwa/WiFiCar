@@ -18,7 +18,7 @@ typedef struct driveCommand {
 } driveCommand_t;
 
 void driveCommandToCharArray(driveCommand_t * in, unsigned char* out){
-    for(int i; i<sizeof(driveCommand_t); i++)
+    for(int i = 0; i<sizeof(driveCommand_t); i++)
         out[i] = ((unsigned char*) in)[i];
 }
 

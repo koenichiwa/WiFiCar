@@ -24,11 +24,11 @@ void `$INSTANCE_NAME`_Start(void){
     `$INSTANCE_NAME`_DirectionReg_Write(FLAG_READY);
 }
 void `$INSTANCE_NAME`_SetSpeeds(int16 left, int16 right){
-    volatile uint8 leftIsReverse = left<0;
-    volatile uint8 rightIsReverse = right<0;
-    volatile uint8 leftFlag = leftIsReverse * FLAG_LEFT_MOTOR;
-    volatile uint8 rightFlag = rightIsReverse * FLAG_RIGHT_MOTOR;
-    volatile uint8 direction = leftFlag | rightFlag;
+    uint8 leftIsReverse = left<0;
+    uint8 rightIsReverse = right<0;
+    uint8 leftFlag = leftIsReverse * FLAG_LEFT_MOTOR;
+    uint8 rightFlag = rightIsReverse * FLAG_RIGHT_MOTOR;
+    uint8 direction = leftFlag | rightFlag;
     `$INSTANCE_NAME`_DirectionReg_Write(`$INSTANCE_NAME`_DirectionReg_Read() | (direction & MOTOR_MASK));
     `$INSTANCE_NAME`_Pwm_WriteCompare1((uint8) abs(right));
     `$INSTANCE_NAME`_Pwm_WriteCompare2((uint8) abs(left));
