@@ -1,5 +1,5 @@
 /*
- * Header file defining basic structs and functions used in multiple different files
+ * Header file defining util structs and functions and functions used in multiple different files
  * This file CAN depend on standard library files, and it MUST NOT depend on project files.
  */
 #pragma once

@@ -3,10 +3,13 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
 #include "mytypes.h"
 
 fvector2_t circle_to_square(fvector2_t * circle)
 {
+    assert(fvector_length(circle)<=1.0);
+    
     float u2 = circle->x * circle->x;
     float v2 = circle->y * circle->y;
     
@@ -25,6 +28,8 @@ fvector2_t circle_to_square(fvector2_t * circle)
 }
 fvector2_t square_to_circle(fvector2_t * square)
 {
+    assert(fabsf(square->x) <= 1.0 && fabsf(square->y)<=1.0);
+    
     fvector2_t circle;
     circle.x = square->x * sqrt(1.0 - square->y*square->y/2.0);
     circle.y = square->y * sqrt(1.0 - square->x*square->x/2.0);

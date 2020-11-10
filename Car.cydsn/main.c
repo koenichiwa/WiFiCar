@@ -13,21 +13,8 @@
 #include "project.h"
 #include <math.h>
 #include <stdio.h>
-#include <assert.h>
 #include "squircular.h"
 #include "mytypes.h"
-
-//MACROS
-// Not used anymore but still useful
-#define max(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a > _b ? _a : _b; })
-    
-#define min(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a < _b ? _a : _b; })
     
 //FLAGS
 #define FLAG_STATE_CHANGED  0b00000001
@@ -85,8 +72,8 @@ int testCounter = 0;
 
 //GLOBAL VARIABLES
 volatile state_t state = {
-    {DRIVECOMMAND_SPACE_SQUARE, {0.0, 0.0}}, // driveCommand
-    FLAG_STATE_CHANGED // hasChanged (Set to 1 because "The creation of state is a change of state" - <INSERT RANDOM PHILOSOPHER>)
+    {DRIVECOMMAND_SPACE_CIRCLE, {0.0, 0.0}},
+    FLAG_STATE_CHANGED // (Set because "The creation of state is a change of state" - <INSERT RANDOM PHILOSOPHER>)
 };
 
 //MAIN
@@ -255,7 +242,7 @@ driveCommand_t readDriveCommand(){
  * If command.space is anything else it will return (0.0, 0.0)
  *
  * @param command The drive command containing the vector (d,f) and the space on which they lie
- * @return The vector (l,r) In the range [-255,255]
+ * @return The vector (r,l) In the range [-255,255]
 **/
 speeds_t convertDriveCommand(driveCommand_t command){
     fvector2_t circledVector;
@@ -271,15 +258,15 @@ speeds_t convertDriveCommand(driveCommand_t command){
         speeds_t speeds = {0,0};
         return speeds;
     }
-    assert(fvector_length(&circledVector) <= 1.0);
+    
     //rotate by 45 degrees
     fvector2_t rotatedVector = fvector_rotate(&circledVector, M_PI_4);
     
     //project back on square
     fvector2_t squaredVector = circle_to_square(&rotatedVector);
     speeds_t speeds;
-    speeds.left = (int16) (squaredVector.y * 255.0);
-    speeds.right = (int16) (squaredVector.x * 255.0);
+    speeds.left = (int16) (squaredVector.x * 255.0);
+    speeds.right = (int16) (squaredVector.y * 255.0);
     return speeds;
 }
 
