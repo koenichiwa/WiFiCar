@@ -9,7 +9,6 @@
  *
  * ========================================
 */
-
 #include "project.h"
 #include <math.h>
 #include <stdio.h>
@@ -20,13 +19,17 @@
 #define FLAG_STATE_CHANGED  0b00000001
 #define FLAG_STATE_QUIT     0b00000010
 // insert other flags here
+#ifdef DEBUG
 #define FLAG_STATE_TEST     0b10000000
-
+#endif // DEBUG
+    
 //-UART
 #define UART_COMMAND_DRIVE  'd'
 #define UART_COMMAND_LIGHT  'l'
-#define UART_COMMAND_TEST   't'
 #define UART_COMMAND_QUIT   'q'
+#ifdef DEBUG
+#define UART_COMMAND_TEST   't'
+#endif // DEBUG
 
 #define UART_RESPONSE_MSG_UNKNOWN   'u'
 
@@ -52,8 +55,10 @@ speeds_t convertDriveCommand(driveCommand_t command);
 CY_ISR_PROTO(commandReceived);
 
 //-FOR TESTING PURPOSES
+#ifdef DEBUG
 void runTestRoutine(int delayMs);
 int testCounter = 0;
+#endif //DEBUG
 
 //GLOBAL VARIABLES
 volatile state_t state = {
@@ -69,10 +74,11 @@ int main(void)
 
     while(1)
     {
+        #ifdef DEBUG
         if(state.flags & FLAG_STATE_TEST) {
             runTestRoutine(1000);
         }
-        
+        #endif //DEBUG
         if(state.flags & FLAG_STATE_CHANGED) {
             speeds_t speeds = convertDriveCommand(state.driveCommand);
             MotorController_SetSpeeds(speeds.left, speeds.right);
@@ -102,12 +108,14 @@ CY_ISR(commandReceived){
         case UART_COMMAND_LIGHT: //Switch Light (for testing connection)
             Out_LED_Write(~Out_LED_Read());
             break;
-        case UART_COMMAND_TEST:
-            state.flags = state.flags | FLAG_STATE_TEST;
-            break;
         case UART_COMMAND_QUIT:
             state.flags = state.flags | FLAG_STATE_QUIT;
             break;
+        #ifdef DEBUG
+        case UART_COMMAND_TEST:
+            state.flags = state.flags | FLAG_STATE_TEST;
+            break;
+        #endif //DEBUG
         default: //Signal that an unknown message was received.
             UART_PutChar(UART_RESPONSE_MSG_UNKNOWN);
             
@@ -116,7 +124,7 @@ CY_ISR(commandReceived){
 
 //FUNCTION DEFINITIONS
 //-TEST ROUTINE
-
+#ifdef DEBUG
 void runTestRoutine(int delay){
     Out_LED_Write(1);
     switch(testCounter){
@@ -186,6 +194,7 @@ void runTestRoutine(int delay){
     }
     
 }
+#endif //DEBUG
 
 
 //-INIT FUNCTIONS
