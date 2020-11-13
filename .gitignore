@@ -35,3 +35,4 @@ Generated_Source
 *.svd
 *.log
 *.zip
+!*.mk
