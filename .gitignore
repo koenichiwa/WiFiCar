@@ -35,4 +35,4 @@ Generated_Source
 *.svd
 *.log
 *.zip
-!Generated_Source/PSoC5/gen_source.mk
+!/Generated_Source/PSoC5/gen_source.mk
