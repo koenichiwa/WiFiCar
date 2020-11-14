@@ -26,7 +26,8 @@ Release/
 Export/
 CortexM*/
 codegentemp
-Generated_Source
+Generated_Source/
+!*.mk
 *_datasheet.pdf
 *_timing.html
 *.cycdx
@@ -35,4 +36,3 @@ Generated_Source
 *.svd
 *.log
 *.zip
-!/Generated_Source/PSoC5/gen_source.mk
