@@ -3,6 +3,17 @@
  */
 #pragma once
 
+//Send by user
+#define COMMAND_DRIVE  'd'
+#define COMMAND_LIGHT  'l'
+#define COMMAND_QUIT   'q'
+#ifdef DEBUG
+#define COMMAND_TEST   't'
+#endif //DEBUG
+
+//Send by car
+#define RESPONSE_MSG_UNKNOWN   'u'
+
 #ifdef __cplusplus
 extern "C" {
 #endif
